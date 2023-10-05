@@ -14,7 +14,7 @@
 </script>
 
 <p>Make your own puzzle! For each color, enter 4 words, and the Category those words belong to.</p>
-<form bind:this={form} on:submit={() => handleSubmit()}>
+<form bind:this={form} on:submit|preventDefault={() => handleSubmit()}>
 	{#each colors as color, groupIdx}
 		<div class="group" style={`background-color: ${color.solvedColor}`}>
 			<fieldset>
@@ -37,7 +37,7 @@
 		</div>
 	{/each}
 
-	<button type="submit" disabled={!form || !form.checkValidity()}>View Puzzle</button>
+	<button type="submit">View Puzzle</button>
 </form>
 
 <style>

@@ -99,6 +99,15 @@
 			{/if}
 		{/each}
 	</div>
+	<div id="mistake-counter">
+		<span class="mistake-label">Mistakes remaining:</span>
+		<span class="counter-container">
+			{#each { length: MISTAKES_ALLOWED } as _, i}
+				{@const mistakesMade = getNumMistakesMade($store)}
+				<span class={`counter ${MISTAKES_ALLOWED - mistakesMade > i ? 'shown' : 'hidden'}`}>*</span>
+			{/each}
+		</span>
+	</div>
 	<div id="controls">
 		<button on:click={() => store.shuffleTiles()}>Shuffle</button>
 		<button on:click={() => store.deselectAll()}>De-select All</button>
@@ -190,7 +199,19 @@
 		font-size: small;
 	}
 
-	#controls {
+	#mistake-counter {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.counter {
+		margin-left: 0.5rem;
+		margin-right: 0.5rem;
+	}
+
+	.counter.hidden {
+		opacity: 0;
 	}
 
 	button {

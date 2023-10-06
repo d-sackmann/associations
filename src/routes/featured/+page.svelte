@@ -2,7 +2,7 @@
 	import Game from '$lib/Game.svelte';
 	import featuredGames from '$lib/featuredGames';
 
-	const game = featuredGames[0];
+	const game = featuredGames[featuredGames.length - 1];
 </script>
 
 <Game {game} />

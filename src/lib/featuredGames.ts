@@ -10,5 +10,11 @@ export default [
 		['Astoria', 'Prospect', 'Central', 'Socrates', 'Parks'],
 		['Plato', 'Souvlaki', 'Baklava', 'Omonia', 'Greek Things'],
 		['Jeans', 'Glasses', "Belluci's", 'Shoes', 'Things in pairs']
+	],
+	[
+		['INVESTMENT', 'SHARE', 'equity', 'INTEREST', 'Financial Involvement'],
+		['CRUCIFIX', 'STAKE', 'SUNLIGHT', 'HOLY WATER', 'Vampire Deterrents'],
+		['TALCUM', 'GARLIC', 'BABY', 'GUN', 'Powder'],
+		['CRIME', 'ONION', 'DIAMOND', 'BOXING', '___ Ring']
 	]
 ];

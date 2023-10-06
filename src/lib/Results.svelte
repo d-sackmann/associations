@@ -60,17 +60,6 @@
 {/if}
 
 <style>
-	.container {
-		width: 100%;
-		height: fit-content;
-		display: flex;
-	}
-	.container.right {
-		justify-content: right;
-	}
-	.container.center {
-		justify-content: center;
-	}
 	#results-container {
 		position: absolute;
 		left: 0;

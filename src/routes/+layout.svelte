@@ -14,7 +14,7 @@
 	<slot />
 </main>
 
-<footer>
+<footer class="container center">
 	<a href="/create">Create your own puzzle</a>
 	<a href="/featured">Featured Puzzle</a>
 	<a href="/about">About</a>
@@ -27,6 +27,21 @@
 </div>
 
 <style>
+	:global(.container) {
+		display: flex;
+		flex-wrap: wrap;
+		box-sizing: border-box;
+		width: 100%;
+		height: fit-content;
+	}
+
+	:global(.container.center) {
+		justify-content: center;
+	}
+
+	:global(.container.right) {
+		justify-content: right;
+	}
 	:global(.game-button) {
 		border-radius: 40px;
 		padding: 15px;
@@ -40,6 +55,10 @@
 		background-color: beige;
 		margin: auto;
 		padding: 1.5rem;
+	}
+
+	footer > a {
+		margin: 8px;
 	}
 
 	#popover-frame {

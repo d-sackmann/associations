@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Results from './Results.svelte';
+
 	import colors from '$lib/colors';
 	import {
 		GROUP_COUNT,
@@ -7,15 +9,16 @@
 		getNumGroupsSolved,
 		MISTAKES_ALLOWED,
 		getNumMistakesMade,
-		type WordGroup
+		type WordGroup,
+		type GameStore
 	} from '$lib/game';
 	import { arrayEquals } from '$lib/utils';
+	import { getContext } from 'svelte';
 
 	export let game: string[][];
 
-	const store = storeFromGroups(game);
+	const store: GameStore = storeFromGroups(game);
 
-	let message: string | null = null;
 	let gameComplete = false;
 	let showResults = false;
 	$: solvedGroups = $store.guesses
@@ -44,14 +47,10 @@
 			showResults = true;
 		}
 	});
-	function flashMessage(msg: string) {
-		message = msg;
-
-		setTimeout(() => (message = null), 2500);
-	}
+	const flashMessage = getContext<(s: string) => void>('popover');
 
 	function handleSubmit() {
-		message = null;
+		flashMessage('');
 		const { alreadyGuessed, offBy } = store.submitGuess();
 
 		if (alreadyGuessed) {
@@ -99,42 +98,33 @@
 			{/if}
 		{/each}
 	</div>
-	<div id="mistake-counter">
-		<span class="mistake-label">Mistakes remaining:</span>
-		<span class="counter-container">
-			{#each { length: MISTAKES_ALLOWED } as _, i}
-				{@const mistakesMade = getNumMistakesMade($store)}
-				<span class={`counter ${MISTAKES_ALLOWED - mistakesMade > i ? 'shown' : 'hidden'}`}>*</span>
-			{/each}
-		</span>
-	</div>
-	<div id="controls">
-		<button on:click={() => store.shuffleTiles()}>Shuffle</button>
-		<button on:click={() => store.deselectAll()}>De-select All</button>
-		<button on:click={() => handleSubmit()} disabled={$store.selections.length !== GROUP_SIZE}
-			>Submit</button
-		>
-		<!-- <button on:click={() => store.solveRemaining()}>Solve</button> -->
-	</div>
+	{#if gameComplete}
+		<button class="game-button" on:click={() => (showResults = true)}>Show Results</button>
+	{:else}
+		<div id="mistake-counter">
+			<span class="mistake-label">Mistakes remaining:</span>
+			<span class="counter-container">
+				{#each { length: MISTAKES_ALLOWED } as _, i}
+					{@const mistakesMade = getNumMistakesMade($store)}
+					<span class={`counter ${MISTAKES_ALLOWED - mistakesMade > i ? 'shown' : 'hidden'}`}
+						>*</span
+					>
+				{/each}
+			</span>
+		</div>
+		<div id="controls">
+			<button class="game-button" on:click={() => store.shuffleTiles()}>Shuffle</button>
+			<button class="game-button" on:click={() => store.deselectAll()}>De-select All</button>
+			<button
+				class="game-button"
+				on:click={() => handleSubmit()}
+				disabled={$store.selections.length !== GROUP_SIZE}>Submit</button
+			>
+		</div>
+	{/if}
 </div>
 
-{#if showResults}
-	<button on:click={() => (showResults = false)}>Close results</button>
-	<div id="guesses">
-		{#each $store.guesses.filter(({ userSubmitted }) => userSubmitted) as guess}
-			<div>
-				{#each guess.words as wordId}
-					{@const groupIdx = Math.floor((wordId - 1) / GROUP_SIZE)}
-					<span>{colors[groupIdx].icon}</span>
-				{/each}
-			</div>
-		{/each}
-	</div>
-{/if}
-
-{#if message}
-	<div>{message}</div>
-{/if}
+<Results {store} bind:show={showResults} />
 
 <style>
 	#game {
@@ -144,6 +134,7 @@
 		box-sizing: border-box;
 		width: calc((4 * var(--tile-size)) + 3 * var(--gutter-size));
 
+		min-width: 385px;
 		--gutter-size: 15px;
 		--tile-size: 90px;
 	}
@@ -212,10 +203,5 @@
 
 	.counter.hidden {
 		opacity: 0;
-	}
-
-	button {
-		border-radius: 40px;
-		padding: 15px;
 	}
 </style>

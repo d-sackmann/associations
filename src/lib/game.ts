@@ -1,11 +1,13 @@
-import { type Subscriber, writable } from 'svelte/store';
+import { type Readable, type Subscriber, writable } from 'svelte/store';
 import { arrayEquals, delay, shuffle, tally } from './utils';
 
-type WordId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+export type WordId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 type Word = {
 	id: WordId;
 	value: string;
 };
+
+const baseDelay = 100;
 
 export type WordGroup = {
 	solved: boolean;
@@ -33,6 +35,7 @@ export const MISTAKES_ALLOWED = 4;
 function idFromCoords(x: number, y: number) {
 	return 1 + GROUP_SIZE * x + y;
 }
+
 export const storeFromGroups = (groupStrings: string[][]) => {
 	if (groupStrings.length !== GROUP_COUNT) {
 		throw new Error('Must have 4 groups');
@@ -77,7 +80,18 @@ function getIndexOfFirstUnsolvedWord(state: GameState) {
 	return getNumGroupsSolved(state) * GROUP_SIZE;
 }
 
-const gameStore = (gameState: GameState) => {
+export type GameStore = Readable<GameState> & {
+	selectTile: (position: number) => void;
+	shuffleTiles: () => void;
+	deselectAll: () => void;
+	solveRemaining: () => Promise<void>;
+	submitGuess: (isUserSubmitted?: boolean | undefined) => {
+		offBy: number;
+		alreadyGuessed: boolean;
+	};
+};
+
+const gameStore = (gameState: GameState): GameStore => {
 	const store = writable(gameState);
 	return {
 		subscribe(cb: Subscriber<GameState>) {
@@ -147,7 +161,7 @@ const gameStore = (gameState: GameState) => {
 				};
 			});
 
-			await delay(1000);
+			await delay(baseDelay * 9);
 
 			for (let i = numGroupsSolved; i < GROUP_COUNT; i++) {
 				for (let j = 0; j < GROUP_SIZE; j++) {
@@ -158,11 +172,11 @@ const gameStore = (gameState: GameState) => {
 						};
 					});
 
-					await delay(500);
+					await delay(baseDelay * 4);
 				}
 
 				this.submitGuess(false);
-				await delay(1500);
+				await delay(baseDelay * 9);
 			}
 		},
 

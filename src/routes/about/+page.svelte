@@ -16,3 +16,10 @@
 	the grid of words and their categories. If you'd like, you can use a link shortening service to make
 	your game easier to share.
 </div>
+
+<style>
+	h1,
+	h3 {
+		width: 100%;
+	}
+</style>

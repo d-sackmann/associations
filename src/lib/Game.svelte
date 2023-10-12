@@ -5,7 +5,6 @@
 	import {
 		GROUP_COUNT,
 		GROUP_SIZE,
-		storeFromGroups,
 		getNumGroupsSolved,
 		MISTAKES_ALLOWED,
 		getNumMistakesMade,
@@ -15,16 +14,14 @@
 	import { arrayEquals } from '$lib/utils';
 	import { getContext } from 'svelte';
 
-	export let game: string[][];
-
-	const store: GameStore = storeFromGroups(game);
+	export let game: GameStore;
 
 	let gameComplete = false;
 	let showResults = false;
-	$: solvedGroups = $store.guesses
+	$: solvedGroups = $game.guesses
 		.filter(({ correct }) => correct)
 		.map(({ words }) =>
-			$store.groups.find((group) =>
+			$game.groups.find((group) =>
 				arrayEquals(
 					group.words.map(({ id }) => id),
 					words
@@ -33,7 +30,7 @@
 		)
 		.filter((x) => x) as WordGroup[];
 
-	store.subscribe(async (gameState) => {
+	game.subscribe(async (gameState) => {
 		if (gameComplete) {
 			return;
 		}
@@ -43,7 +40,7 @@
 			getNumMistakesMade(gameState) === MISTAKES_ALLOWED;
 
 		if (gameComplete) {
-			await store.solveRemaining();
+			await game.solveRemaining();
 			showResults = true;
 		}
 	});
@@ -51,7 +48,7 @@
 
 	function handleSubmit() {
 		flashMessage('');
-		const { alreadyGuessed, offBy } = store.submitGuess();
+		const { alreadyGuessed, offBy } = game.submitGuess();
 
 		if (alreadyGuessed) {
 			flashMessage('Already Guessed!');
@@ -82,17 +79,17 @@
 				<div class="group-words">{solvedGroup.words.map((s) => s.value).join(', ')}</div>
 			</div>
 		{/each}
-		{#each $store.positions as wordIdAtPosition, position}
+		{#each $game.positions as wordIdAtPosition, position}
 			{@const firstIndexUnsolved = solvedGroups.length * GROUP_SIZE}
-			{@const word = $store.groups
+			{@const word = $game.groups
 				.flatMap((group) => group.words)
 				.find(({ id }) => id === wordIdAtPosition)?.value}
 
 			{#if position >= firstIndexUnsolved}
 				<button
-					class={`item ${$store.selections.includes(wordIdAtPosition) ? 'selected' : 'unselected'}`}
+					class={`item ${$game.selections.includes(wordIdAtPosition) ? 'selected' : 'unselected'}`}
 					id={`item-${wordIdAtPosition}`}
-					on:click={() => store.selectTile(position)}
+					on:click={() => game.selectTile(position)}
 					>{word}
 				</button>
 			{/if}
@@ -105,7 +102,7 @@
 			<span class="mistake-label">Mistakes remaining:</span>
 			<span class="counter-container">
 				{#each { length: MISTAKES_ALLOWED } as _, i}
-					{@const mistakesMade = getNumMistakesMade($store)}
+					{@const mistakesMade = getNumMistakesMade($game)}
 					<span class={`counter ${MISTAKES_ALLOWED - mistakesMade > i ? 'shown' : 'hidden'}`}
 						>*</span
 					>
@@ -113,18 +110,18 @@
 			</span>
 		</div>
 		<div id="controls">
-			<button class="game-button" on:click={() => store.shuffleTiles()}>Shuffle</button>
-			<button class="game-button" on:click={() => store.deselectAll()}>De-select All</button>
+			<button class="game-button" on:click={() => game.shuffleTiles()}>Shuffle</button>
+			<button class="game-button" on:click={() => game.deselectAll()}>De-select All</button>
 			<button
 				class="game-button"
 				on:click={() => handleSubmit()}
-				disabled={$store.selections.length !== GROUP_SIZE}>Submit</button
+				disabled={$game.selections.length !== GROUP_SIZE}>Submit</button
 			>
 		</div>
 	{/if}
 </div>
 
-<Results {store} bind:show={showResults} />
+<Results store={game} bind:show={showResults} />
 
 <style>
 	#game {

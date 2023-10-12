@@ -36,7 +36,7 @@ function idFromCoords(x: number, y: number) {
 	return 1 + GROUP_SIZE * x + y;
 }
 
-export const storeFromGroups = (groupStrings: string[][]) => {
+const getInitialState = (groupStrings: string[][]) => {
 	if (groupStrings.length !== GROUP_COUNT) {
 		throw new Error('Must have 4 groups');
 	}
@@ -61,12 +61,16 @@ export const storeFromGroups = (groupStrings: string[][]) => {
 				.map((value, j) => ({ value, id: idFromCoords(i, j) as WordId }))
 		};
 	});
-	return gameStore({
+	return {
 		guesses: [] as Guess[],
 		selections: [],
 		positions: initialPositions,
 		groups
-	});
+	};
+};
+
+export const storeFromGroups = (groupStrings: string[][]) => {
+	return gameStore(getInitialState(groupStrings));
 };
 
 export function getNumMistakesMade(state: GameState) {
@@ -89,6 +93,7 @@ export type GameStore = Readable<GameState> & {
 		offBy: number;
 		alreadyGuessed: boolean;
 	};
+	setFromGroups: (groups: string[][]) => void;
 };
 
 const gameStore = (gameState: GameState): GameStore => {
@@ -96,6 +101,10 @@ const gameStore = (gameState: GameState): GameStore => {
 	return {
 		subscribe(cb: Subscriber<GameState>) {
 			return store.subscribe(cb);
+		},
+
+		setFromGroups(groups) {
+			store.set(getInitialState(groups));
 		},
 
 		selectTile(position: number) {
